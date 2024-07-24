@@ -359,6 +359,7 @@ plot(trans_table_spring[,1],trans_table_spring[,2],
 
 dev.off()
 graphics.off()
+
 ```
 
 And now plot the fall brown-down transition dates.
