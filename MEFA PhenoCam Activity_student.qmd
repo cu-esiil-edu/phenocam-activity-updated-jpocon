@@ -123,7 +123,7 @@ You can filter the table by any of the available attributes (column names). For 
 
 ```{r}
 # Create a subset of only grassland sites 
-GR_sites <- subset(sitelist_table, primary_veg_type == "")  
+GR_sites <- subset(sitelist_table, primary_veg_type == "GR")  
 
 # View the first few grassland entries and entire table
 View(GR_sites)
@@ -132,7 +132,8 @@ View(GR_sites)
 **Challenge**: Can you subset the sitelist_table by a different primary vegetation type. How about by a different variable (table column)? Use the code cell below.
 
 ```{r}
-
+AG_sites <- subset(sitelist_table, primary_veg_type == "AG")
+View(AG_sites)
 ```
 
 #### Create a Map of the PhenoCam Sites
@@ -175,6 +176,12 @@ theme(plot.title = element_text(hjust = 0.5, size = 20))
   
 # View map
 Site_map
+
+# Save site map
+ggsave(paste0(dir, '/Site_map.png'), width=10, height=5)
+
+dev.off()
+graphics.off()
 ```
 
 **Challenge**: Can you change the title of the map? Make the change and re-run the code cell above.
@@ -193,16 +200,16 @@ Now, let's view some PhenoCam images and greenness data. Choose a site to explor
 ```{r}
 # Choose site to explore 
 # Enter name exactly as it appears in the table/on the website
-site_name = ""
+site_name = "lacclair"
 
 # Indicate vegetation type (listed on site page)
-veg = ""
+veg = "DB"
 
 # Choose data year (for downloading images later)
-year = 
+year = 2022
 
 # Indicate ROI ID
-ROI = 
+ROI = 1000
 
 # View the objects to make sure correct
 site_name
@@ -228,6 +235,9 @@ colnames(GCC_timeseries)
 Now, we'll plot the GCC timeseries to see how canopy greenness changes over time at your chosen site. From the "GCC_timeseries" table, we'll plot the variable called "gcc_90", which corresponds to the 90th percentile of GCC values across the 3-day window within the designated ROI. Using the 90th percentile (rather than the mean) reduces the influence of changing weather and brightness across the images. See [Richardson et al. (2018)](https://www.nature.com/articles/sdata201828) for more details on data products and processing.
 
 ```{r}
+# Save plot
+png(paste0(dir, '/Canopy_greenness_timeseries-lacclair.png'), height = 500, width = 1000, units = "px")
+
 # Put date into date format
 GCC_timeseries[,date:=as.Date(date)]
 
@@ -244,6 +254,9 @@ plot(GCC_timeseries$date, GCC_timeseries$gcc_90,
      xlab = 'Date', ylab = 'GCC', 
      # Add title
      main = paste0(site_name, ': ', 'Canopy Greenness Timeseries'))
+
+dev.off()
+graphics.off()
 ```
 
 *Note: Since the plot isn't saved as an object, it only appears in the built-in plot viewer for R. However, you can right click on the plot to copy and paste it elsewhere. If you accidentally close a plot and want to see it again, just re-run the code cell that created it.*
@@ -289,13 +302,15 @@ td_fall <- trans_dates[trans_dates$direction == "falling" & trans_dates$gcc_valu
 
 # As above, create a simple line graph of the Green Chromatic Coordinate (GCC)
 
+# Save plot
+png(paste0(dir, '/GCC_transitions-lacclair.png'), height = 500, width = 1000, units = "px")
+
 # Plot- this time use "type = 1" to create a smooth line graph
 plot(GCC_timeseries$date, GCC_timeseries$gcc_90, 
      col = "black", type = "l",
      cex = 2, cex.lab = 2, cex.axis = 2, cex.main = 3,
      xlab = 'Date', ylab = 'GCC', 
      main = paste0(site_name, ': ', 'Seasonal Transition Dates'))
-
 
 # Add points to show transition dates:
 
@@ -310,6 +325,9 @@ points(x = as.Date(td_fall$transition_50, origin = "1970-01-01"),
        y = td_fall$threshold_50,
        pch = 19, cex = 2,
        col = "brown")
+
+dev.off()
+graphics.off()
 ```
 
 Now, let's explore the variability of seasonal transition dates throughout the available data years. This works best if you chose a site with a longer timeseries. We'll first convert the transition dates into a "day-of-year" (DOY) format (e.g., Jan 1 = DOY 1, Jan 2 = DOY 2, etc.), and then plot those by year.
@@ -329,12 +347,18 @@ years_spr <- as.numeric(format(td_spring_dates,'%Y'))
 # Create table of years and spring transition dates
 trans_table_spring <- data.frame(years_spr, td_spring_DOY)
 
+# Save plot
+png(paste0(dir, '/Spring_onsets-lacclair.png'), height = 500, width = 1000, units = "px")
+
 # Plot spring green-up dates
 plot(trans_table_spring[,1],trans_table_spring[,2], 
     type = "b", col = "darkgreen",
     cex = 2, cex.lab = 2, cex.axis = 2, cex.main = 3,
     xlab = 'Year', ylab = 'Spring Transition Date (DOY)',
     main = paste0(site_name, ': ', 'Date of Spring Onset Through the Years'))
+
+dev.off()
+graphics.off()
 ```
 
 And now plot the fall brown-down transition dates.
