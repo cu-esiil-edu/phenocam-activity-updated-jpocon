@@ -132,7 +132,11 @@ View(GR_sites)
 **Challenge**: Can you subset the sitelist_table by a different primary vegetation type? How about by a different variable (table column)? Use the code cell below.
 
 ```{r}
+# Create a subset of only grassland sites 
+AG_sites <- subset(sitelist_table, primary_veg_type == "AG")  
 
+# View the first few grassland entries and entire table
+View(AG_sites)
 ```
 
 #### Create a Map of the PhenoCam Sites
@@ -175,6 +179,12 @@ theme(plot.title = element_text(hjust = 0.5, size = 20))
   
 # View map
 Site_map
+
+# Save map
+ggsave(paste0(dir, '/Map.png'), height = 5, width = 10)
+
+dev.off()
+graphics.off()
 ```
 
 **Challenge**: Can you change the title of the map? Make the change and re-run the code cell above.
@@ -234,6 +244,9 @@ GCC_timeseries[,date:=as.Date(date)]
 # Adjust plot area margins
 par(mar=c(5, 6, 4, 2))
 
+# Save plot
+png(paste0(dir, '/Canopy_greenness_timeseries.png'), width = 1000, height = 500, units = "px")
+
 # Create line plot
 plot(GCC_timeseries$date, GCC_timeseries$gcc_90,
      # Choose line color & type
@@ -245,6 +258,8 @@ plot(GCC_timeseries$date, GCC_timeseries$gcc_90,
      # Add title
      main = paste0(site_name, ": ", "Canopy Greenness Timeseries"))
 
+dev.off()
+graphics.off()
 ```
 
 *Note: Since the plot isn't saved as an object, it only appears in the built-in plot viewer for R. However, you can right click on the plot to copy and paste it elsewhere. If you accidentally close a plot and want to see it again, just re-run the code cell that created it.*
@@ -287,9 +302,10 @@ td_rise <- trans_dates[trans_dates$direction == "rising" & trans_dates$gcc_value
 # Select the falling (fall dates) for 50% threshold of Gcc 90
 td_fall <- trans_dates[trans_dates$direction == "falling" & trans_dates$gcc_value == "gcc_90",]
 
+# Save plot
+png(paste0(dir, '/Seasonal_transitions.png'), width = 1000, height = 500, units = "px")
 
 # As above, create a simple line graph of the Green Chromatic Coordinate (GCC)
-
 # Plot- this time use "type = 1" to create a smooth line graph
 plot(GCC_timeseries$date, GCC_timeseries$gcc_90, 
      col = "black", type = "l",
@@ -297,9 +313,7 @@ plot(GCC_timeseries$date, GCC_timeseries$gcc_90,
      xlab = 'Date', ylab = 'GCC', 
      main = paste0(site_name, ': ', 'Seasonal Transition Dates'))
 
-
 # Add points to show transition dates:
-
 # Spring green-up
 points(x = as.Date(td_rise$transition_50, origin = "1970-01-01"),
        y = td_rise$threshold_50,
@@ -311,6 +325,9 @@ points(x = as.Date(td_fall$transition_50, origin = "1970-01-01"),
        y = td_fall$threshold_50,
        pch = 19, cex = 2,
        col = "brown")
+
+dev.off()
+graphics.off()
 ```
 
 Now, let's explore the variability of seasonal transition dates throughout the available data years. This works best if you chose a site with a longer timeseries. We'll first convert the transition dates into a "day-of-year" (DOY) format (e.g., Jan 1 = DOY 1, Jan 2 = DOY 2, etc.), and then plot those by year.
@@ -330,12 +347,18 @@ years_spr <- as.numeric(format(td_spring_dates,'%Y'))
 # Create table of years and spring transition dates
 trans_table_spring <- data.frame(years_spr, td_spring_DOY)
 
+# Save plot
+png(paste0(dir, '/Spring_onset.png'), width = 1000, height = 500, units = "px")
+
 # Plot spring green-up dates
 plot(trans_table_spring[,1],trans_table_spring[,2], 
     type = "b", col = "darkgreen",
     cex = 2, cex.lab = 2, cex.axis = 2, cex.main = 3,
     xlab = 'Year', ylab = 'Spring Transition Date (DOY)',
     main = paste0(site_name, ': ', 'Date of Spring Onset Through the Years'))
+
+dev.off()
+graphics.off()
 ```
 
 And now plot the fall brown-down transition dates.
@@ -347,12 +370,18 @@ years_fall <- as.numeric(format(td_fall_dates,'%Y'))
 # Create table of years and fall transition dates
 trans_table_fall <- data.frame(years_fall, td_fall_DOY)
 
+# Save plot
+png(paste0(dir, '/Autumn_onset.png'), width = 1000, height = 500, units = "px")
+
 # Plot fall brown-down dates
 plot(trans_table_fall[,1],trans_table_fall[,2], 
      type = "b", col = "brown",
      cex = 2, cex.lab = 2, cex.axis = 2, cex.main = 3,
      xlab = 'Year', ylab = 'Autumn Transition Date (DOY)',
      main = paste0(site_name, ': ', 'Date of Autumn Onset Through the Years'))
+
+dev.off()
+graphics.off()
 ```
 
 As you can see, there is a decent amount of year-to-year variability in when a site greens up (spring) or browns down (fall), directly impacting the total length of the growing sesason. This variability is largely due to differences in weather, such as precipitation and temperature. Climate change is also shifting seasonal transition dates, which can impact many other variables, such as plant-animal interactions and ecosystem carbon and water storage.
@@ -388,6 +417,9 @@ n
 Then we'll create the layout.
 
 ```{r}
+# Save plot
+png(paste0(dir, '/Monthly_canopy_greenness.png'), width = 1000, height = 500, units = "px")
+
 # Set up image layout (4 rows & 3 columns)
 par(mar= c(0,0,0,0), mfrow=c(4,3), oma=c(0,23,3,23))
 
@@ -401,6 +433,9 @@ for(i in 1:n){
 
 # Add title (feel free to edit the title below)
 mtext(paste0(site_name, ': ', 'Canopy Greenness Through the Months'), font = 2, cex = 1.8, outer = TRUE)
+
+dev.off()
+graphics.off()
 ```
 
 Finally, we'll use those same images to create a gif that shows changes in phenology over time. This is great to use in presentations to visualize seasonal transitions!
@@ -447,10 +482,10 @@ To do this, edit the cell near the beginning where you assign the site name, veg
 dev.off()
 
 # List all files in "pheno_images"
-f <- list.files(dir, include.dirs = F, full.names = T, recursive = T)
+#f <- list.files(dir, include.dirs = F, full.names = T, recursive = T)
 
 # Remove the files
-file.remove(f)
+#file.remove(f)
 ```
 
 #### Thank you
